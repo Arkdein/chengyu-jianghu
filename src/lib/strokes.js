@@ -1,41 +1,30 @@
-// Stroke-order data lives in public/strokes/<char>.json (hanzi-writer-data, Arphic Public License).
+// Stroke-order data lives in public/strokes/bNN.json buckets (hanzi-writer-data, Arphic Public License).
 const BASE = import.meta.env.BASE_URL;
-let manifest = null;
+const BUCKETS = 32;
+const bucketOf = (ch) => ch.codePointAt(0) % BUCKETS;
+export const bucketUrl = (n) => `${BASE}strokes/b${String(n).padStart(2, '0')}.json`;
+const loaded = {};
 
-export const strokeUrl = (ch) => `${BASE}strokes/${encodeURIComponent(ch)}.json`;
-
-export function loadStrokeManifest() {
-  if (!manifest) {
-    manifest = fetch(`${BASE}stroke-manifest.json`)
-      .then((r) => (r.ok ? r.json() : { have: [], missing: [] }))
-      .catch(() => ({ have: [], missing: [] }));
-  }
-  return manifest;
-}
-
-/** hanzi-writer charDataLoader: fetch (and let the service worker cache) one character. */
-export function charDataLoader(ch, onLoad, onError) {
-  fetch(strokeUrl(ch))
-    .then((r) => {
+function bucket(n) {
+  if (!loaded[n]) {
+    loaded[n] = fetch(bucketUrl(n)).then((r) => {
       if (!r.ok) throw new Error('missing');
       return r.json();
-    })
-    .then(onLoad)
+    }).catch((e) => { delete loaded[n]; throw e; });
+  }
+  return loaded[n];
+}
+
+/** hanzi-writer charDataLoader */
+export function charDataLoader(ch, onLoad, onError) {
+  bucket(bucketOf(ch))
+    .then((b) => (b[ch] ? onLoad(b[ch]) : onError(new Error('missing'))))
     .catch(onError);
 }
 
-/** Fetch every character once so the service worker keeps them for offline use. */
+/** Fetch every bucket once so the service worker keeps them for offline use. */
 export async function cacheAllStrokes(onProgress) {
-  const { have } = await loadStrokeManifest();
-  const queue = have.slice();
   let done = 0;
-  const worker = async () => {
-    while (queue.length) {
-      const ch = queue.pop();
-      try { await fetch(strokeUrl(ch)); } catch { /* offline: skip */ }
-      onProgress?.(++done, have.length);
-    }
-  };
-  await Promise.all([worker(), worker(), worker(), worker()]);
-  return have.length;
+  await Promise.all(Array.from({ length: BUCKETS }, (_, n) => bucket(n).catch(() => null).then(() => onProgress?.(++done, BUCKETS))));
+  return BUCKETS;
 }
