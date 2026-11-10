@@ -232,14 +232,24 @@ function pickGivens(cells, words, rand) {
     const counts = {};
     for (const ch of w.w) counts[ch] = (counts[ch] || 0) + 1;
     const repeated = ks.filter((k) => counts[cells[k].ch] > 1);
-    const crossing = ks.filter((k) => cells[k].words.length > 1);
+    // a cell may be given only if no idiom through it ends up more than half given (一心一意 gives
+    // both 一; a crossing on 心 or 意 must not fill in the rest)
+    const room = (k) => cells[k].words.every((i) => {
+      const wc = words[i].cells;
+      return wc.filter((x) => cells[x].given).length + 1 <= Math.floor(wc.length / 2);
+    });
+    const crossing = ks.filter((k) => cells[k].words.length > 1 && room(k));
     let pick;
     if (repeated.length) {
       // give every copy of the repeated character (still at most half the idiom)
       repeated.slice(0, Math.floor(ks.length / 2)).forEach((k) => { cells[k].given = true; });
       continue;
     } else if (crossing.length) pick = crossing[Math.floor(rand() * crossing.length)];
-    else pick = ks[Math.floor(rand() * ks.length)];
+    else {
+      const free = ks.filter((k) => cells[k].words.length === 1);
+      const pool = free.length ? free : ks;
+      pick = pool[Math.floor(rand() * pool.length)];
+    }
     cells[pick].given = true;
   }
 }

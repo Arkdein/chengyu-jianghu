@@ -31,8 +31,9 @@ ARCHIVE_TIPS = {
 
 CHAPTER_SIZE = 10
 CHAPTER_NAMES = ["龙门卷", "乾坤卷", "风云卷", "山河卷", "星斗卷", "江湖卷", "日月卷", "四海卷", "九州卷", "天下卷",
-                 "青锋卷", "流云卷", "沧浪卷", "松涛卷", "听雨卷", "揽月卷"]
-H2_NAMES = ["文心卷", "墨韵卷", "诗魂卷", "史鉴卷", "经纬卷", "辞章卷"]
+                 "青锋卷", "流云卷", "沧浪卷", "松涛卷", "听雨卷", "揽月卷",
+                 "长风卷", "剑影卷", "鸿雁卷", "烟雨卷", "飞雪卷", "惊鸿卷", "归云卷", "长河卷", "丹心卷", "千秋卷"]
+H2_NAMES = ["文心卷", "墨韵卷", "诗魂卷", "史鉴卷", "经纬卷", "辞章卷", "春秋卷", "诸子卷", "风雅卷", "汗青卷", "长歌卷"]
 # Chapters 1–8 were fixed when Phase 1 shipped. Later batches never reshuffle them: each later batch
 # forms new chapters appended at the end, so a student's chapter progress stays where it was.
 FOUNDING = {"classics.json", "archive.json", "batch-b1.json"}
@@ -127,7 +128,8 @@ def main():
             it["tip"] = ARCHIVE_TIPS.get(it["w"], "")
         it["ctx"] = blank(it["ex"], it["w"])
         if not it.get("hint"):
-            it["hint"] = "语境：" + it["ctx"]
+            label = "例句：" if any(c in "语境" for c in it["w"]) else "语境："  # 鸟语花香 would leak 语
+            it["hint"] = label + it["ctx"]
         if any(c in it["hint"] for c in it["w"]):  # 原文 (wenyan) is exempt: H2 bosses quote the source on purpose
             problems.append(f"{it['w']}: hint contains part of the answer")
         it.setdefault("panelNote", "")
