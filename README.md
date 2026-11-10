@@ -14,7 +14,7 @@ Game design doc: https://claude.ai/artifact/MkPeboGZzXUhLJzVDgsfda
 - **Spaced repetition:** each idiom's result in a run moves it up or down Leitner boxes. Writing it cleanly counts as good; a paid clue, tracing or 3+ wrong strokes counts as a hint; revealing a character (点穴) or failing counts as again.
 - **Stroke strictness setting:** 宽松 / 标准 / 严格 (leniency 1.7 / 1.35 / 1.0), with score multipliers ×0.9 / ×1 / ×1.15 to keep the pure-score leaderboard fair.
 - **战绩 Records:** best and weekly scores, recent runs, and the idioms most often missed (心魔榜).
-- **Settings:** name, class, 门派, strictness, offline download, backup code (CYJH1.…) for changing phones, and reset.
+- **Settings:** name, class, 门派 (习字堂 = H1, 溯源堂 = H2), strictness, offline download, backup code (CYJH1.…) for changing phones, and reset.
 
 Phase 2 adds the class leaderboard (Google Form → Sheet → published CSV), the 武学 skill tree that spends banked 内力, the full 闯荡江湖 run, and the teacher report.
 

@@ -148,7 +148,7 @@ def main():
     order, meta, n1, n2 = [], [], 0, 0
     for n, (ch, track) in enumerate(chs):
         if track == "H2":
-            name = "H2·" + H2_NAMES[n2] if n2 < len(H2_NAMES) else f"H2·第{n2 + 1}卷"
+            name = "溯源·" + H2_NAMES[n2] if n2 < len(H2_NAMES) else f"溯源·第{n2 + 1}卷"
             n2 += 1
         else:
             name = CHAPTER_NAMES[n1] if n1 < len(CHAPTER_NAMES) else f"第{n1 + 1}卷"

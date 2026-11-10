@@ -23,9 +23,9 @@ export function Library({ ch }) {
         const open = unlocked(s, list, i);
         return (
           <a class={`card ch ${open ? '' : 'locked'}`} href={open ? `#/library/${c.n}` : undefined} key={c.n}>
-            <div class="no">{c.name.replace('H2·', '').slice(0, 2)}</div>
+            <div class="no">{c.name.replace('溯源·', '').slice(0, 2)}</div>
             <div class="grow">
-              <h3>{c.name} {c.track === 'H2' && <span class="chip h2">H2 原文</span>}</h3>
+              <h3>{c.name} {c.track === 'H2' && <span class="chip h2">溯源 · 原文</span>}</h3>
               <div class="small mute">{c.ids.slice(0, 4).map((id) => BY_ID[id].w).join('、')}……</div>
               <div class="bar" style={{ marginTop: '8px' }}><i style={{ width: `${(done / c.ids.length) * 100}%` }} /></div>
               <div class="small mute" style={{ marginTop: '4px' }}>{open ? `已学 ${done} / ${c.ids.length}` : '学完上一卷八成后开放'}</div>

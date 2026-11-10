@@ -18,7 +18,7 @@ const NODE = {
   elite: { name: '大擂台', desc: '更大的擂台，破一个成语内力翻倍' },
   inn: { name: '客栈', desc: `恢复 ${GAIN.innHeal} 气血，答语境题赚内力` },
   encounter: { name: '奇遇', desc: '说书人讲典故，认出成语得内力' },
-  library: { name: '藏书楼', desc: 'H2：读原文，认出化出的成语' },
+  library: { name: '藏书楼', desc: '溯源堂：读原文，认出化出的成语' },
   boss: { name: '心魔', desc: '默写最常错的成语' },
 };
 
@@ -514,7 +514,7 @@ function Library({ pool, seed, act, trim }) {
     return (
       <div class="card" style={{ textAlign: 'center' }}>
         <h2 class="brush" style={{ fontSize: '30px' }}>藏书楼</h2>
-        <p class="small">楼里的书你还没读过。先到藏经阁学几个 H2 原文成语吧。</p>
+        <p class="small">楼里的书你还没读过。先到藏经阁学几卷溯源卷的成语吧。</p>
         <button class="btn primary big" onClick={act.next}>继续前进</button>
       </div>
     );

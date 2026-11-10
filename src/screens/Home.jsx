@@ -1,3 +1,4 @@
+import { hallOf } from '../lib/menpai.js';
 import { useStore, update } from '../lib/store.js';
 import { useToday } from '../lib/hooks.js';
 import { chaptersFor, IDIOMS, STORY } from '../lib/data.js';
@@ -85,7 +86,7 @@ export function Home() {
           <a class="btn" href={`#/library/${next.n}`}>继续学习</a>
         </div>
       )}
-      <div class="foot">门派：{s.profile.menpai === 'H2' ? 'H2 华文与文学' : 'H1 华文'} · 笔顺判定：{STRICTNESS[s.profile.strict].label} · <a href="#/settings">设置</a></div>
+      <div class="foot">门派：{hallOf(s.profile.menpai).name}（{s.profile.menpai}） · 笔顺判定：{STRICTNESS[s.profile.strict].label} · <a href="#/settings">设置</a></div>
     </div>
   );
 }

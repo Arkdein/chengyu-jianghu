@@ -1,3 +1,4 @@
+import { MENPAI, hallOf } from '../lib/menpai.js';
 import { useState } from 'preact/hooks';
 import { useStore, update, replaceState, resetState, storageWorks } from '../lib/store.js';
 import { STRICTNESS, exportCode, importCode } from '../lib/progress.js';
@@ -42,13 +43,13 @@ export function Settings() {
       </div>
 
       <div class="card">
-        <h3>门派</h3>
+        <h3>门派 · 书院两堂</h3>
         <div class="seg">
           {['H1', 'H2'].map((m) => (
-            <button class={s.profile.menpai === m ? 'on' : ''} onClick={() => setProfile('menpai', m)}>{m === 'H1' ? 'H1 华文' : 'H2 华文与文学'}</button>
+            <button class={s.profile.menpai === m ? 'on' : ''} onClick={() => setProfile('menpai', m)}>{MENPAI[m].name}<span class="small mute"> {m}</span></button>
           ))}
         </div>
-        <p class="small mute" style={{ margin: '8px 0 0' }}>{s.profile.menpai === 'H2' ? 'H2：藏经阁多出带原文的卷，闯关多一个「藏书楼」，心魔会附上原文。' : 'H1：共同成语库。'}</p>
+        <p class="small mute" style={{ margin: '8px 0 0' }}>{hallOf(s.profile.menpai).desc}</p>
       </div>
 
       <div class="card">
