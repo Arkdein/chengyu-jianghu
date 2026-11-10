@@ -62,7 +62,7 @@ a { color: var(--seal); }
 .grow { flex: 1; }
 .chip { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 999px; background: var(--jade-soft); color: var(--jade); margin-right: 4px; }
 .chip.src { background: var(--gold-soft); color: var(--gold); }
-.chip.seal { background: var(--seal-soft); color: var(--seal); }
+.chip.h2 { background: var(--seal-soft); color: var(--seal); }
 .bar { height: 6px; border-radius: 3px; background: var(--paper2); overflow: hidden; }
 .bar i { display: block; height: 100%; background: var(--jade); transition: width .3s; }
 .bar.hp { background: var(--seal-soft); }
@@ -187,3 +187,40 @@ table.t { width: 100%; border-collapse: collapse; font-size: 14px; }
 table.t td, table.t th { padding: 6px 4px; border-bottom: 1px dashed var(--line); text-align: left; }
 table.t th { font-size: 12px; color: var(--mute); font-weight: 500; }
 .foot { margin-top: 22px; font-size: 11px; color: var(--mute); line-height: 1.6; text-align: center; }
+
+/* story dialogue */
+.dlg { cursor: pointer; border-left: 4px solid var(--ink2); }
+.dlg-title { letter-spacing: .08em; margin-bottom: 8px; }
+.dlg-row { display: flex; gap: 12px; align-items: flex-start; }
+.dlg-mark { width: 44px; height: 44px; flex: none; border-radius: 50%; background: var(--ink2); color: var(--paper); display: grid; place-items: center;
+  font-family: "Ma Shan Zheng", "Noto Serif SC", serif; font-size: 22px; }
+.dlg-mark.evil { background: var(--seal); }
+.dlg-mark.narr { background: transparent; border: 1px dashed var(--line); }
+.dlg-who { font-weight: 700; font-size: 14px; margin-bottom: 2px; }
+.dlg-text { font-size: 17px; line-height: 1.7; }
+.dlg-text.narr { font-style: italic; color: var(--ink2); }
+.dlg-lesson { padding: 12px; border-radius: 10px; background: var(--gold-soft); font-size: 16px; line-height: 1.6; font-family: "Noto Serif SC", serif; }
+.dlg-lesson b { color: var(--gold); }
+.taunt { margin: 6px 0 10px; padding: 10px 12px; border-radius: 10px; background: var(--seal-soft); color: var(--seal); font-family: "Noto Serif SC", serif; font-size: 15px; }
+.rank { display: inline-block; padding: 2px 10px; border-radius: 999px; border: 1px solid var(--gold); color: var(--gold); font-size: 12px; }
+
+/* skills */
+.branch h3 { margin: 4px 0 8px; }
+.skill { border: 1px solid var(--line); border-radius: 12px; padding: 12px; margin-bottom: 8px; background: var(--card); }
+.skill.owned { border-color: var(--gold); background: var(--gold-soft); }
+.skill.locked { opacity: .55; }
+.skill .sn { font-family: "Noto Serif SC", serif; font-weight: 900; font-size: 20px; letter-spacing: .06em; }
+.skill .src { font-size: 12px; color: var(--mute); }
+.skill .orig { font-family: "Noto Serif SC", serif; font-size: 14px; color: var(--ink2); margin: 6px 0 2px; }
+.skill .eff { font-size: 13px; margin-top: 6px; }
+
+/* map */
+.map { display: flex; flex-direction: column; gap: 10px; }
+.map .layer { display: flex; gap: 8px; }
+.map .node { flex: 1; text-align: center; border: 1px solid var(--line); border-radius: 12px; padding: 12px 6px; background: var(--card); box-shadow: var(--shadow); }
+.map .node b { display: block; font-family: "Noto Serif SC", serif; font-size: 18px; }
+.map .node.past { opacity: .45; box-shadow: none; }
+.map .node.chosen { border-color: var(--jade); background: var(--jade-soft); }
+.tabs { display: flex; gap: 6px; margin: 6px 0 10px; flex-wrap: wrap; }
+.tabs button { border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 6px 12px; font-size: 13px; }
+.tabs button.on { background: var(--ink2); color: var(--paper); border-color: var(--ink2); }

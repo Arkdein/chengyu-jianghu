@@ -49,7 +49,8 @@ export function IdiomCard({ it, compact }) {
       <div style={{ marginTop: '6px' }}>
         {it.panels.length > 0 && <span class="chip">有典故</span>}
         {it.exam && <span class="chip src">真题 · {it.exam}</span>}
-        {it.src && <span class="chip src">出处 · {it.src}</span>}
+        {it.src && !it.wenyan && <span class="chip src">出处 · {it.src}</span>}
+        {it.wenyan && <span class="chip h2">H2</span>}
       </div>
       <div class="ic-sec"><h4>释义</h4><p class="serif">{it.def}</p><p class="en">{it.en}</p></div>
       <div class="ic-sec">
@@ -59,7 +60,10 @@ export function IdiomCard({ it, compact }) {
           <Say item={it} part="ex" />
         </div>
       </div>
-      {it.tip && <div class="tip"><b>用法提醒</b>　{it.tip}</div>}
+      {it.wenyan && (
+        <div class="ic-sec"><h4>原文 · {it.src}</h4><p class="serif" style={{ color: 'var(--ink2)' }}>{it.wenyan}</p></div>
+      )}
+      {it.tip && <div class="tip"><b>{it.wenyan ? '赏析' : '用法提醒'}</b>　{it.tip}</div>}
       {!compact && it.panels.length > 0 && (
         <div class="ic-sec">
           <h4>典故连环画</h4>

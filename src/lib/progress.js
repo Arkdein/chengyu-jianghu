@@ -2,6 +2,7 @@
 // or older backup never crashes the app.
 import { BY_ID } from './data.js';
 import { STRICTNESS } from './strictness.js';
+import { SKILL } from './skills.js';
 
 export { STRICTNESS };
 
@@ -14,6 +15,9 @@ export function defaultState() {
     qi: 0, // banked 内力 (spent on the skill tree in Phase 2)
     runs: [], // last 60 runs: { day, mode, score, raw, strict, idioms, failed }
     best: {}, // mode -> best score
+    skills: {}, // skill id -> day bought
+    story: { intro: false, pro: [], beaten: [], hub: {}, queue: [] },
+    outbox: [], // leaderboard/report posts waiting for a connection
   };
 }
 
@@ -38,6 +42,18 @@ export function sanitize(s) {
     if (BY_ID[id] && c && Number.isFinite(c.b) && Number.isFinite(c.due)) out.cards[id] = c;
   }
   for (const [m, v] of Object.entries(s.best || {})) if (Number.isFinite(v)) out.best[m] = v;
+  out.skills = {};
+  for (const [k, v] of Object.entries(s.skills || {})) if (SKILL[k]) out.skills[k] = Number(v) || 1;
+  const st = s.story || {};
+  const ints = (a) => (Array.isArray(a) ? a.filter(Number.isInteger) : []);
+  out.story = {
+    intro: !!st.intro,
+    pro: ints(st.pro),
+    beaten: ints(st.beaten),
+    hub: st.hub && typeof st.hub === 'object' ? { ...st.hub } : {},
+    queue: Array.isArray(st.queue) ? st.queue.slice(0, 6) : [],
+  };
+  out.outbox = Array.isArray(s.outbox) ? s.outbox.slice(-40) : [];
   return out;
 }
 

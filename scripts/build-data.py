@@ -31,20 +31,52 @@ ARCHIVE_TIPS = {
 
 CHAPTER_SIZE = 10
 CHAPTER_NAMES = ["龙门卷", "乾坤卷", "风云卷", "山河卷", "星斗卷", "江湖卷", "日月卷", "四海卷", "九州卷", "天下卷",
-                 "青锋卷", "流云卷"]
+                 "青锋卷", "流云卷", "沧浪卷", "松涛卷", "听雨卷", "揽月卷"]
+H2_NAMES = ["文心卷", "墨韵卷", "诗魂卷", "史鉴卷", "经纬卷", "辞章卷"]
+# Chapters 1–8 were fixed when Phase 1 shipped. Later batches never reshuffle them: each later batch
+# forms new chapters appended at the end, so a student's chapter progress stays where it was.
+FOUNDING = {"classics.json", "archive.json", "batch-b1.json"}
+
+
+def sources():
+    return ["classics.json", "archive.json"] + sorted(
+        os.path.basename(p) for p in glob.glob(os.path.join(SRC, "batch-*.json")))
 
 
 def load():
     items = []
-    for name in ["classics.json", "archive.json"] + sorted(
-            os.path.basename(p) for p in glob.glob(os.path.join(SRC, "batch-*.json"))):
+    for name in sources():
         with open(os.path.join(SRC, name), encoding="utf-8") as f:
-            items += json.load(f)
+            batch = json.load(f)
+        for it in batch:
+            it["_src"] = name
+        items += batch
     return items
 
 
 def blank(ex, w):
     return ex.replace(w, "＿" * len(w)) if w in ex else ""
+
+
+def greedy(batch, known):
+    """Split one later batch into chapters, each idiom joining the chapter where it shares most characters."""
+    rest = list(batch)
+    out = []
+    known = set(known)
+    while rest:
+        cur, cur_chars = [], set()
+        while rest and len(cur) < CHAPTER_SIZE:
+            best = max(rest, key=lambda it: len(set(it["w"]) & (known | cur_chars)))
+            rest.remove(best)
+            cur.append(best)
+            cur_chars |= set(best["w"])
+        known |= cur_chars
+        # a tiny last chapter is merged into the previous one
+        if out and len(cur) < 5:
+            out[-1] += cur
+        else:
+            out.append(cur)
+    return out
 
 
 def chapters(items):
@@ -96,23 +128,37 @@ def main():
         it["ctx"] = blank(it["ex"], it["w"])
         if not it.get("hint"):
             it["hint"] = "语境：" + it["ctx"]
-        if any(c in it["hint"] for c in it["w"]):
+        if any(c in it["hint"] for c in it["w"]):  # 原文 (wenyan) is exempt: H2 bosses quote the source on purpose
             problems.append(f"{it['w']}: hint contains part of the answer")
         it.setdefault("panelNote", "")
     if problems:
         print("\n".join(problems))
         sys.exit(1)
-    chs = chapters(items)
-    order = []
-    for n, ch in enumerate(chs):
+    founding = [it for it in items if it["_src"] in FOUNDING]
+    chs = [(ch, "all") for ch in chapters(founding)]
+    known = set("".join(it["w"] for it in founding))
+    for name in sources():
+        if name in FOUNDING:
+            continue
+        batch = [it for it in items if it["_src"] == name]
+        track = "H2" if all(it["tracks"] == ["H2"] for it in batch) else "all"
+        for ch in greedy(batch, known):
+            chs.append((ch, track))
+            known |= set("".join(it["w"] for it in ch))
+    order, meta, n1, n2 = [], [], 0, 0
+    for n, (ch, track) in enumerate(chs):
+        if track == "H2":
+            name = "H2·" + H2_NAMES[n2] if n2 < len(H2_NAMES) else f"H2·第{n2 + 1}卷"
+            n2 += 1
+        else:
+            name = CHAPTER_NAMES[n1] if n1 < len(CHAPTER_NAMES) else f"第{n1 + 1}卷"
+            n1 += 1
+        meta.append({"n": n, "name": name, "track": track, "ids": [it["id"] for it in ch]})
         for it in ch:
             it["ch"] = n
+            it.pop("_src", None)
             order.append(it)
-    data = {
-        "chapters": [{"n": n, "name": CHAPTER_NAMES[n] if n < len(CHAPTER_NAMES) else f"第{n + 1}卷",
-                      "ids": [it["id"] for it in ch]} for n, ch in enumerate(chs)],
-        "idioms": order,
-    }
+    data = {"chapters": meta, "idioms": order}
     with open(os.path.join(ROOT, "src", "data", "idioms.json"), "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, separators=(",", ":"))
     print(f"{len(order)} idioms in {len(chs)} chapters")

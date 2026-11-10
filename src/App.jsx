@@ -7,10 +7,13 @@ import { Learn } from './screens/Learn.jsx';
 import { Run } from './screens/Run.jsx';
 import { Records } from './screens/Records.jsx';
 import { Settings } from './screens/Settings.jsx';
+import { Skills } from './screens/Skills.jsx';
+import { Story } from './screens/Story.jsx';
 
 const TABS = [
-  ['#/', 'home', '江湖', 'Home'],
+  ['#/', 'home', '书院', 'Home'],
   ['#/library', 'library', '藏经阁', 'Learn'],
+  ['#/skills', 'skills', '武学', 'Skills'],
   ['#/records', 'records', '战绩', 'Records'],
   ['#/settings', 'settings', '设置', 'Settings'],
 ];
@@ -27,11 +30,13 @@ export function App() {
       {route.name === 'run' && <Run mode={route.mode} />}
       {route.name === 'records' && <Records />}
       {route.name === 'settings' && <Settings />}
+      {route.name === 'skills' && <Skills />}
+      {route.name === 'story' && <Story />}
       {!inRun && (
         <nav class="nav" aria-label="主菜单">
           <div class="nav-in">
             {TABS.map(([href, name, zh, en]) => (
-              <a href={href} class={route.name === name || (name === 'library' && route.name === 'learn') ? 'on' : ''}>
+              <a href={href} class={route.name === name || (name === 'library' && route.name === 'learn') || (name === 'home' && route.name === 'story') ? 'on' : ''}>
                 <b>{zh}</b>{en}
               </a>
             ))}

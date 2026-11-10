@@ -41,31 +41,57 @@ export function hardest(state, items, n, exclude = new Set()) {
     .map((x) => x.it);
 }
 
+export const MODES = {
+  short: { name: '小试身手', min: 10, boss: 2 },
+  full: { name: '闯荡江湖', min: 20, boss: 3 },
+};
+
 /**
- * A short run (小试身手): 比武 → fork (客栈 or 奇遇) → 比武 → 心魔.
- * Grid sizes grow a little as the student learns more idioms.
+ * A run is a list of layers; each layer offers one or more nodes and the student picks one.
+ *   short (小试身手): 比武 → 客栈|奇遇 → 比武 → 心魔
+ *   full  (闯荡江湖): 比武 → four forks of two (比武, 大擂台, 客栈, 奇遇, H2 藏书楼) → 心魔
+ * Grids are built when a 比武 node is entered, from the idioms not used yet in this run.
  */
-export function planRun(state, today, idioms, seed) {
+export function planRun(state, today, idioms, seed, mode = 'short', menpai = 'H1') {
   const order = priority(state, today, idioms, seed);
-  const size = order.length >= 30 ? 6 : order.length >= 16 ? 5 : 4;
-  const g1 = buildGrid(order, size, seed);
-  const used = new Set(g1.words.map((w) => w.id));
+  const rand = rng(seed + 101);
+  let layers;
+  if (mode === 'full') {
+    layers = [[{ type: 'duel' }]];
+    for (let i = 1; i <= 4; i++) {
+      const pool = ['duel', 'duel', 'inn', 'encounter'];
+      if (i >= 2) pool.push('elite');
+      if (menpai === 'H2') pool.push('library');
+      let pick;
+      do pick = shuffle(pool, rand).slice(0, 2);
+      while (pick[0] === pick[1] || !pick.some((t) => t === 'duel' || t === 'elite'));
+      layers.push(pick.map((type) => ({ type })));
+    }
+    layers.push([{ type: 'boss' }]);
+  } else {
+    layers = [[{ type: 'duel' }], [{ type: 'inn' }, { type: 'encounter' }], [{ type: 'duel' }], [{ type: 'boss' }]];
+  }
+  return { seed, mode, layers, order: order.map((it) => it.id) };
+}
+
+export function gridSize(mode, kind, learnt) {
+  if (kind === 'elite') return learnt >= 30 ? 8 : 7;
+  if (mode === 'full') return learnt >= 30 ? 6 : 5;
+  return learnt >= 30 ? 6 : learnt >= 16 ? 5 : 4;
+}
+
+/** A crossword for the next 比武, preferring idioms this run has not used yet. */
+export function makeGrid(order, used, size, seed) {
   let rest = order.filter((it) => !used.has(it.id));
   if (rest.length < size + 2) rest = shuffle(order, rng(seed + 7));
-  const g2 = buildGrid(rest, size, seed + 1);
-  g2.words.forEach((w) => used.add(w.id));
-  const learnt = idioms.filter((it) => state.cards[it.id]);
-  let boss = hardest(state, learnt, 2, used);
-  if (boss.length < 2) boss = hardest(state, learnt, 2);
-  return {
-    seed,
-    nodes: [
-      { type: 'duel', grid: g1 },
-      { type: 'fork', options: ['inn', 'encounter'] },
-      { type: 'duel', grid: g2 },
-      { type: 'boss', ids: boss.map((it) => it.id) },
-    ],
-  };
+  return buildGrid(rest, size, seed);
+}
+
+/** The 心魔's idioms: the student's hardest, avoiding ones already met in this run when possible. */
+export function bossIdioms(state, learnt, n, used) {
+  let out = hardest(state, learnt, n, used);
+  if (out.length < n) out = hardest(state, learnt, n);
+  return out;
 }
 
 /** Multiple-choice questions for 客栈 and 奇遇: the right idiom plus distractors from what the student knows. */
@@ -75,17 +101,19 @@ export function quiz(target, pool, n, rand) {
 }
 
 /**
- * Run score. `stats` = { charsWritten, idiomsSolved, hp, secs, reveals, bossPerfect, strict }.
+ * Run score. `stats` = { charsWritten, perfectChars, idiomsSolved, perfectIdioms, hp, secs, reveals, bossPerfect, strict }.
+ * `skills` = the student's 武学 (入木三分, 百步穿杨 and 运斤成风 change the score).
  * The stroke-strictness multiplier keeps the pure-score leaderboard fair across settings.
  */
-export function score(stats) {
+export function score(stats, skills = {}) {
   const parts = {
-    chars: stats.charsWritten * POINTS.char,
+    chars: stats.charsWritten * POINTS.char + (skills.wai1 ? (stats.perfectChars || 0) * 5 : 0),
     idioms: stats.idiomsSolved * POINTS.idiom,
     hp: Math.max(0, stats.hp) * POINTS.hp,
-    speed: Math.max(0, POINTS.speedMax - Math.floor(stats.secs / 2)),
+    speed: Math.max(0, (skills.wai3 ? 450 : POINTS.speedMax) - Math.floor(stats.secs / 2)),
     noReveal: stats.reveals === 0 ? POINTS.noReveal : 0,
     boss: stats.bossPerfect * POINTS.bossPerfect,
+    perfect: skills.wai2 ? (stats.perfectIdioms || 0) * 50 : 0,
   };
   const raw = Object.values(parts).reduce((a, b) => a + b, 0);
   const mult = (STRICTNESS[stats.strict] || STRICTNESS.std).mult;

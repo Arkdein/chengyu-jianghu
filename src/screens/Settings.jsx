@@ -4,6 +4,10 @@ import { STRICTNESS, exportCode, importCode } from '../lib/progress.js';
 import { cacheAllAudio } from '../lib/audio.js';
 import { cacheAllStrokes } from '../lib/strokes.js';
 import { Top } from '../components/Bits.jsx';
+import { post } from '../lib/net.js';
+import { statusOf } from '../lib/srs.js';
+import { BY_ID } from '../lib/data.js';
+import { dayNumber } from '../lib/dates.js';
 
 const setProfile = (k, v) => update((s) => ({ ...s, profile: { ...s.profile, [k]: v } }));
 
@@ -23,13 +27,28 @@ export function Settings() {
       </div>
 
       <div class="card">
+        <h3>交给老师</h3>
+        <p class="small mute" style={{ margin: '0 0 8px' }}>把学习进度（已学、熟练、最高分、最常错的成语）送给老师。只送这些，不送其他资料。</p>
+        <button class="btn" disabled={!s.profile.name} onClick={() => {
+          const cards = Object.entries(s.cards);
+          const today = dayNumber();
+          post({ type: 'report', name: s.profile.name, cls: s.profile.cls, menpai: s.profile.menpai, learnt: cards.length,
+            secure: cards.filter(([, c]) => statusOf(c) === 'secure').length, bestShort: s.best.short || 0, bestFull: s.best.full || 0,
+            runs: s.runs.length, runsWeek: s.runs.filter((r) => r.day > today - 7).length, qi: s.qi, story: s.story.beaten.length,
+            weak: cards.filter(([, c]) => c.bad > 0).sort((a, b) => b[1].bad - a[1].bad).slice(0, 8).map(([id]) => BY_ID[id].w), strict: s.profile.strict });
+          setMsg('进度报告已排队送出（有网络时自动送达）。');
+        }}>交给老师</button>
+        {!s.profile.name && <span class="small mute">　先填姓名</span>}
+      </div>
+
+      <div class="card">
         <h3>门派</h3>
         <div class="seg">
           {['H1', 'H2'].map((m) => (
             <button class={s.profile.menpai === m ? 'on' : ''} onClick={() => setProfile('menpai', m)}>{m === 'H1' ? 'H1 华文' : 'H2 华文与文学'}</button>
           ))}
         </div>
-        {s.profile.menpai === 'H2' && <p class="small mute" style={{ margin: '8px 0 0' }}>H2 专属的文言出处与赏析题正在审核中；目前 H2 门派先用共同成语库闯关。</p>}
+        <p class="small mute" style={{ margin: '8px 0 0' }}>{s.profile.menpai === 'H2' ? 'H2：藏经阁多出带原文的卷，闯关多一个「藏书楼」，心魔会附上原文。' : 'H1：共同成语库。'}</p>
       </div>
 
       <div class="card">

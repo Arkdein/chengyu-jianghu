@@ -9,6 +9,8 @@ export function parseRoute(hash) {
   if (a === 'run') return { name: 'run', mode: b || 'short' };
   if (a === 'records') return { name: 'records' };
   if (a === 'settings') return { name: 'settings' };
+  if (a === 'skills') return { name: 'skills' };
+  if (a === 'story') return { name: 'story' };
   return { name: 'home' };
 }
 
