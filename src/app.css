@@ -4,6 +4,7 @@
   --jade: #3E7A68; --jade-soft: #D9EADF;
   --shadow: 0 1px 2px rgba(40, 30, 20, .08), 0 6px 18px rgba(40, 30, 20, .08);
   --safe-b: env(safe-area-inset-bottom, 0px);
+  --veil: 243, 235, 221;
 }
 @media (prefers-color-scheme: dark) {
   :root {
@@ -11,6 +12,7 @@
     --line: #40372B; --seal: #D9584A; --seal-soft: #3B211C; --gold: #D6AE55; --gold-soft: #3A3020;
     --jade: #6FB39C; --jade-soft: #1F3029;
     --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 6px 18px rgba(0, 0, 0, .35);
+    --veil: 23, 20, 15;
   }
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -224,3 +226,39 @@ table.t th { font-size: 12px; color: var(--mute); font-weight: 500; }
 .tabs { display: flex; gap: 6px; margin: 6px 0 10px; flex-wrap: wrap; }
 .tabs button { border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 6px 12px; font-size: 13px; }
 .tabs button.on { background: var(--ink2); color: var(--paper); border-color: var(--ink2); }
+
+/* ---- art: style A backdrops and portraits, style B comics ---- */
+.backdrop { position: fixed; inset: 0; z-index: -1; pointer-events: none; background-color: var(--paper);
+  background-image: linear-gradient(180deg, rgba(var(--veil), .62) 0%, rgba(var(--veil), .38) 30%, rgba(var(--veil), .55) 65%, rgba(var(--veil), .82) 100%), var(--img);
+  background-size: cover; background-position: center top; animation: bd-in .5s ease-out; }
+.backdrop.strong { background-image: linear-gradient(180deg, rgba(var(--veil), .72) 0%, rgba(var(--veil), .62) 35%, rgba(var(--veil), .85) 100%), var(--img); }
+@media (prefers-color-scheme: dark) {
+  .backdrop { background-image: linear-gradient(180deg, rgba(var(--veil), .78) 0%, rgba(var(--veil), .6) 30%, rgba(var(--veil), .72) 65%, rgba(var(--veil), .9) 100%), var(--img); }
+  .backdrop.strong { background-image: linear-gradient(180deg, rgba(var(--veil), .85) 0%, rgba(var(--veil), .78) 35%, rgba(var(--veil), .92) 100%), var(--img); }
+}
+@keyframes bd-in { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .backdrop { animation: none; } }
+html, body { background-color: var(--paper); }
+#app { position: relative; z-index: 0; isolation: isolate; }
+.top h1, .top .sub, .back, .wrap.full > .row .small { text-shadow: 0 0 6px rgba(var(--veil), 1), 0 0 2px rgba(var(--veil), 1), 0 0 12px rgba(var(--veil), .9); }
+.top .sub { color: var(--ink2); }
+.route { background: rgba(var(--veil), .82); border-radius: 12px; padding: 8px 10px 6px; backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
+.route .n { color: var(--ink2); }
+.card.clues { padding: 10px 12px; }
+
+.pt { display: block; flex: none; object-fit: cover; border-radius: 8px; border: 1px solid var(--line); background: var(--paper2); box-shadow: var(--shadow); }
+.pt-xs { width: 30px; height: 40px; border-radius: 5px; box-shadow: none; }
+.pt-s { width: 54px; height: 72px; }
+.pt-m { width: 72px; height: 96px; }
+.pt-l { width: 120px; height: 160px; margin: 6px auto 10px; }
+.idiom-row .pt-xs { margin-right: 2px; }
+.dlg-row .pt { margin-top: 2px; }
+.boss-head { display: flex; gap: 12px; align-items: flex-start; }
+.boss-head .pt { border-color: var(--seal); }
+.boss-card { display: flex; gap: 12px; align-items: flex-start; }
+
+.panel { margin: 0; }
+.panel .art { aspect-ratio: 1 / 1; }
+.panel .art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.panel .art b { z-index: 1; top: 5px; left: 5px; width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center;
+  background: rgba(30, 27, 24, .72); color: #fff; font-size: 11px; }

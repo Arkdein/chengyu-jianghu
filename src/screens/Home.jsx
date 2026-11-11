@@ -9,7 +9,7 @@ import { STRICTNESS } from '../lib/progress.js';
 import { nextScene, markSeen, storyChapter, bossFor } from '../lib/story.js';
 import { rankOf } from '../lib/skills.js';
 import { Dialogue } from '../components/Dialogue.jsx';
-import { Seal } from '../components/Bits.jsx';
+import { Seal, Portrait } from '../components/Bits.jsx';
 
 export function Home() {
   const s = useStore();
@@ -36,7 +36,11 @@ export function Home() {
       {scene && <Dialogue key={scene.key + scene.title + s.story.queue.length} scene={scene} name={s.profile.name} onDone={() => update((st) => markSeen(st, scene))} />}
 
       {!scene && (
-        <div class="card" style={{ borderLeft: '4px solid var(--seal)' }}>
+        <div class="card boss-card" style={{ borderLeft: '4px solid var(--seal)' }}>
+          {(c >= STORY.chapters.length || s.story.pro.includes(c) || boss.kind === 'story') && (
+            <Portrait k={`boss-${c >= STORY.chapters.length ? 9 : c + 1}`} size="s" alt="" />
+          )}
+          <div class="grow">
           {c < STORY.chapters.length ? (
             <>
               <div class="small mute">蚀字之劫 · 第{c + 1}回</div>
@@ -55,6 +59,7 @@ export function Home() {
             </>
           )}
           <p class="small" style={{ margin: '8px 0 0' }}><a href="#/story">剧情回顾</a></p>
+          </div>
         </div>
       )}
 

@@ -1,5 +1,7 @@
 import { useState } from 'preact/hooks';
 import { fill } from '../lib/story.js';
+import { PORTRAIT } from '../lib/art.js';
+import { Portrait } from './Bits.jsx';
 
 const ROLE = { 墨老: '山长', 青岚: '师姐', 小砚: '书童', 柳先生: '说书人', 老金: '客栈掌柜' };
 const MARK = { 墨老: '墨', 青岚: '岚', 小砚: '砚', 柳先生: '柳', 老金: '金', 旁白: '　' };
@@ -18,7 +20,9 @@ export function Dialogue({ scene, name, onDone }) {
         <div class="dlg-lesson"><b>心得</b>　{fill(line.t, name)}</div>
       ) : (
         <div class="dlg-row">
-          <div class={`dlg-mark ${villain ? 'evil' : ''} ${line.s === '旁白' ? 'narr' : ''}`}>{MARK[line.s] || line.s[0]}</div>
+          {PORTRAIT[line.s]
+            ? <Portrait k={PORTRAIT[line.s]} alt={line.s} />
+            : line.s !== '旁白' && <div class={`dlg-mark ${villain ? 'evil' : ''}`}>{MARK[line.s] || line.s[0]}</div>}
           <div class="grow">
             {line.s !== '旁白' && <div class="dlg-who">{line.s}<span class="small mute">{ROLE[line.s] ? ` · ${ROLE[line.s]}` : ''}</span></div>}
             <div class={`dlg-text serif ${line.s === '旁白' ? 'narr' : ''}`}>{fill(line.t, name)}</div>

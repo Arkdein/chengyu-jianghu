@@ -133,6 +133,11 @@ def main():
         if any(c in it["hint"] for c in it["w"]):  # 原文 (wenyan) is exempt: H2 bosses quote the source on purpose
             problems.append(f"{it['w']}: hint contains part of the answer")
         it.setdefault("panelNote", "")
+        n = len(it.get("panels") or [])
+        art = [os.path.join(ROOT, "public", "art", "comics", f"{it['id']}-{k}.webp") for k in range(1, n + 1)]
+        it["comic"] = bool(n) and all(os.path.exists(a) for a in art)
+        if n and not it["comic"]:
+            print(f"note: {it['w']} has a storyboard but no comic yet")
     if problems:
         print("\n".join(problems))
         sys.exit(1)

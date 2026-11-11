@@ -32,6 +32,11 @@ export default defineConfig({
         navigateFallback: 'index.html',
         runtimeCaching: [
           {
+            urlPattern: ({ url }) => url.pathname.includes('/art/') && url.pathname.endsWith('.webp'),
+            handler: 'CacheFirst',
+            options: { cacheName: 'art', expiration: { maxEntries: 400 }, cacheableResponse: { statuses: [200] } },
+          },
+          {
             urlPattern: ({ url }) => url.pathname.includes('/audio/') && url.pathname.endsWith('.mp3'),
             handler: 'CacheFirst',
             options: { cacheName: 'audio', expiration: { maxEntries: 2000 }, rangeRequests: true, cacheableResponse: { statuses: [200] } },

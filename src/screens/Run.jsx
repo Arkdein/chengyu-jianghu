@@ -11,7 +11,8 @@ import { has } from '../lib/skills.js';
 import { post } from '../lib/net.js';
 import { rng } from '../lib/grid.js';
 import { HanziPad } from '../components/HanziPad.jsx';
-import { IdiomCard, Sheet } from '../components/Bits.jsx';
+import { IdiomCard, Sheet, Backdrop, Portrait, Comic } from '../components/Bits.jsx';
+import { NODE_BG, bossArt } from '../lib/art.js';
 
 const NODE = {
   duel: { name: '比武', desc: '成语填字擂台' },
@@ -177,9 +178,13 @@ export function Run({ mode: modeArg }) {
   const type = layer.length === 1 ? layer[0].type : R.picks[R.layer];
   const leniency = STRICTNESS[strict].leniency;
   const nodeKey = `${R.layer}-${type}`;
+  const bossNo = bossArt(boss);
+  const bg = R.end ? 'bg-end' : !type ? 'bg-fork' : type === 'boss' ? (bossNo ? `boss-${bossNo}` : 'bg-elite') : NODE_BG[type];
+  const busy = !R.end && (type === 'duel' || type === 'elite' || type === 'boss');
 
   return (
     <div class="wrap full">
+      <Backdrop k={bg} strong={busy} />
       <div class="row" style={{ justifyContent: 'space-between' }}>
         <button class="back" onClick={() => setQuit(true)}>‹ 撤退</button>
         <span class="small mute">{MODES[mode].name} · 第 {R.layer + 1} / {plan.layers.length} 站</span>
@@ -202,7 +207,7 @@ export function Run({ mode: modeArg }) {
       {type === 'library' && <Library key={nodeKey} pool={learntItems} seed={seed + R.layer} act={act} trim={has(s, 'xin2')} />}
       {type === 'boss' && (
         <Boss key="boss" boss={boss} n={MODES[mode].boss} used={R.used} learnt={learntItems} act={act} leniency={leniency}
-          name={s.profile.name} giveFirst={has(s, 'qian2')} initials={has(s, 'xin1')} h2={menpai === 'H2'} />
+          name={s.profile.name} giveFirst={has(s, 'qian2')} initials={has(s, 'xin1')} h2={menpai === 'H2'} art={bossNo} />
       )}
 
       {R.end && <EndCard R={R} strict={strict} mode={mode} boss={boss} name={s.profile.name} />}
@@ -357,7 +362,7 @@ function Duel({ order, used, size, seed, elite, act, leniency, title, canReroll 
         </div>
       )}
 
-      <div style={{ marginTop: '12px' }}>
+      <div class="card clues">
         <div class="small mute">全部线索 · 已破 {solved.current.size} / {grid.words.length}</div>
         {grid.words.map((ww, i) => ({ ww, i })).sort((a, b) => nums[a.ww.cells[0]] - nums[b.ww.cells[0]] || (a.ww.d < b.ww.d ? -1 : 1)).map(({ ww, i }) => {
           const ok = solved.current.has(i);
@@ -455,6 +460,7 @@ function Inn({ pool, seed, act, trim }) {
     return (
       <div class="card" style={{ textAlign: 'center' }}>
         <h2 class="brush" style={{ fontSize: '30px' }}>悦来客栈</h2>
+        <Portrait k="laojin" size="l" alt="老金" />
         <p class="small">老金：“客官，喝碗热茶，养养精神。”</p>
         <button class="btn primary big" onClick={() => { act.heal(GAIN.innHeal); setHealed(true); }}>歇脚（+{GAIN.innHeal} 气血）</button>
       </div>
@@ -463,6 +469,7 @@ function Inn({ pool, seed, act, trim }) {
   if (i >= qs.length) {
     return (
       <div class="card" style={{ textAlign: 'center' }}>
+        <Portrait k="laojin" size="m" alt="老金" />
         <p>老金：“客官慢走！”</p>
         <button class="btn primary big" onClick={act.next}>继续前进</button>
       </div>
@@ -490,8 +497,14 @@ function Encounter({ pool, seed, act, trim }) {
   const [done, setDone] = useState(false);
   return (
     <div class="card">
-      <h2 class="brush" style={{ fontSize: '30px', margin: '0 0 6px' }}>奇遇</h2>
-      <p class="small mute">{q.story ? '路边茶摊，说书人柳先生一拍醒木：“话说……”' : '一位老者拦住你：“小友，考考你。”'}</p>
+      <div class="row" style={{ flexWrap: 'nowrap', alignItems: 'center' }}>
+        {q.story && <Portrait k="liu" size="s" alt="柳先生" />}
+        <div class="grow">
+          <h2 class="brush" style={{ fontSize: '30px', margin: '0 0 2px' }}>奇遇</h2>
+          <p class="small mute" style={{ margin: 0 }}>{q.story ? '路边茶摊，说书人柳先生一拍醒木：“话说……”' : '一位老者拦住你：“小友，考考你。”'}</p>
+        </div>
+      </div>
+      {q.story && q.t.comic && <Comic it={q.t} captions={false} />}
       <p class="serif" style={{ fontSize: '17px', lineHeight: 1.7 }}>{q.story ? q.t.panels.join('') : q.t.clue}</p>
       <p class="small">这说的是哪个成语？（答对 +{GAIN.encounterQi} 内力，答错 −{GAIN.encounterHurt} 气血）</p>
       <Choices target={q.t} opts={q.opts} trim={trim} rand={rand} onAnswer={(ok) => { act.quizResult(q.t.id, ok, GAIN.encounterQi, GAIN.encounterHurt); setDone(true); }} />
@@ -532,7 +545,7 @@ function Library({ pool, seed, act, trim }) {
 }
 
 // ---------------------------------------------------------------- 心魔: write whole idioms from the clue
-function Boss({ boss, n: count, used, learnt, act, leniency, name, giveFirst, initials, h2 }) {
+function Boss({ boss, n: count, used, learnt, act, leniency, name, giveFirst, initials, h2, art }) {
   const ids = useMemo(() => bossIdioms(getState(), learnt, count, new Set(used)).map((it) => it.id), []);
   // A taunt must never quote one of the idioms the student is about to write.
   const taunt = useMemo(() => {
@@ -553,6 +566,7 @@ function Boss({ boss, n: count, used, learnt, act, leniency, name, giveFirst, in
   if (n >= ids.length) {
     return (
       <div class="card" style={{ textAlign: 'center' }}>
+        {art && <Portrait k={`boss-${art}`} size="l" alt={boss.boss} />}
         <h2 class="brush" style={{ fontSize: '32px', color: 'var(--seal)' }}>{boss.boss}溃散</h2>
         <p class="serif taunt">「{fill(boss.defeat, name)}」</p>
         <button class="btn primary big" onClick={act.next}>结算</button>
@@ -590,10 +604,15 @@ function Boss({ boss, n: count, used, learnt, act, leniency, name, giveFirst, in
   }
   return (
     <div class="card">
-      <div class="small mute">{boss.kind === 'story' ? `蚀字之劫 · 第${boss.c + 1}回` : '心魔'} · {n + 1} / {ids.length}</div>
-      <h2 class="brush" style={{ fontSize: '30px', margin: '0 0 2px', color: 'var(--seal)' }}>{boss.boss}</h2>
-      <div class="small mute">「{boss.title}」· 它挑的是你最常写错的成语</div>
-      {n === 0 && <div class="taunt">「{fill(taunt, name)}」</div>}
+      <div class="boss-head">
+        {art && <Portrait k={`boss-${art}`} size={n === 0 ? 'm' : 's'} alt={boss.boss} />}
+        <div class="grow">
+          <div class="small mute">{boss.kind === 'story' ? `蚀字之劫 · 第${boss.c + 1}回` : '心魔'} · {n + 1} / {ids.length}</div>
+          <h2 class="brush" style={{ fontSize: '30px', margin: '0 0 2px', color: 'var(--seal)' }}>{boss.boss}</h2>
+          <div class="small mute">「{boss.title}」· 它挑的是你最常写错的成语</div>
+          {n === 0 && <div class="taunt">「{fill(taunt, name)}」</div>}
+        </div>
+      </div>
       <div class="clue" style={{ boxShadow: 'none' }}>
         <div class="txt">{it.clue}</div>
         {h2 && it.wenyan && <div class="hint">原文：{blankIn(it.wenyan, it.w)}</div>}

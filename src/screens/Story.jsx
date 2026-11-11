@@ -1,7 +1,7 @@
 import { useStore } from '../lib/store.js';
 import { STORY } from '../lib/data.js';
 import { seenStory, fill } from '../lib/story.js';
-import { Top } from '../components/Bits.jsx';
+import { Top, Portrait } from '../components/Bits.jsx';
 
 export function Story() {
   const s = useStore();
@@ -25,7 +25,9 @@ export function Story() {
         <h3>心魔谱</h3>
         {STORY.chapters.map((ch, c) => (
           <div class="idiom-row" key={c}>
-            <span class={`dot ${s.story.beaten.includes(c) ? 'secure' : ''}`} />
+            {s.story.beaten.includes(c) || s.story.pro.includes(c)
+              ? <Portrait k={`boss-${c + 1}`} size="xs" alt="" />
+              : <span class={`dot ${s.story.beaten.includes(c) ? 'secure' : ''}`} />}
             <span class="grow serif">{s.story.beaten.includes(c) || s.story.pro.includes(c) ? `${ch.boss}（${ch.flaw}）` : '？？？'}</span>
             <span class="small mute">{s.story.beaten.includes(c) ? ch.lesson.split('：')[0] : ''}</span>
           </div>

@@ -1,4 +1,34 @@
 import { play, useAudioReady } from '../lib/audio.js';
+import { sceneSrc, comicSrc, ptSrc } from '../lib/art.js';
+
+/** Full-screen ink-wash backdrop behind a screen. strong = heavier paper veil (busy screens like the grid).
+ * The URL is made absolute: a relative url() inside a CSS variable resolves against the stylesheet, not the page. */
+export function Backdrop({ k, strong }) {
+  if (!k) return null;
+  return <div class={`backdrop ${strong ? 'strong' : ''}`} style={{ '--img': `url("${new URL(sceneSrc(k), document.baseURI).href}")` }} aria-hidden="true" />;
+}
+
+/** A character portrait (style A). */
+export function Portrait({ k, size = 'm', alt = '' }) {
+  return <img class={`pt pt-${size}`} src={ptSrc(k)} alt={alt} loading="lazy" decoding="async" />;
+}
+
+/** The four-panel 典故 comic (style B). With captions it reads as a 连环画; without, it is a picture riddle. */
+export function Comic({ it, captions = true }) {
+  return (
+    <div class="panels">
+      {it.panels.map((p, i) => (
+        <figure class="panel" key={i}>
+          <div class="art">
+            {it.comic ? <img src={comicSrc(it.id, i + 1)} alt={captions ? '' : `第${i + 1}格`} loading="lazy" decoding="async" /> : <>{brush(i)}<em>插画待生成</em></>}
+            <b>{i + 1}</b>
+          </div>
+          {captions && <figcaption class="cap serif">{p}</figcaption>}
+        </figure>
+      ))}
+    </div>
+  );
+}
 
 export function Seal({ children = '成语江湖' }) {
   return <div class="seal brush" aria-hidden="true">{children.slice(0, 2)}<br />{children.slice(2, 4)}</div>;
@@ -67,14 +97,7 @@ export function IdiomCard({ it, compact }) {
       {!compact && it.panels.length > 0 && (
         <div class="ic-sec">
           <h4>典故连环画</h4>
-          <div class="panels">
-            {it.panels.map((p, i) => (
-              <div class="panel" key={i}>
-                <div class="art"><b>{i + 1}</b>{brush(i)}<em>插画待生成</em></div>
-                <div class="cap serif">{p}</div>
-              </div>
-            ))}
-          </div>
+          <Comic it={it} />
           {it.panelNote && <p class="small mute" style={{ marginTop: '6px' }}>{it.panelNote}</p>}
         </div>
       )}

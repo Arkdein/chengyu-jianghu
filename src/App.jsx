@@ -9,6 +9,10 @@ import { Records } from './screens/Records.jsx';
 import { Settings } from './screens/Settings.jsx';
 import { Skills } from './screens/Skills.jsx';
 import { Story } from './screens/Story.jsx';
+import { Backdrop } from './components/Bits.jsx';
+
+/** Backdrop per screen; a run sets its own per node. */
+const SCREEN_BG = { home: 'bg-hub', story: 'bg-hub', library: 'bg-library', learn: 'bg-library', skills: 'bg-hub', records: 'bg-hub', settings: 'bg-hub' };
 
 const TABS = [
   ['#/', 'home', '书院', 'Home'],
@@ -24,6 +28,7 @@ export function App() {
   const inRun = route.name === 'run';
   return (
     <>
+      {!inRun && <Backdrop key={route.name} k={SCREEN_BG[route.name]} strong={route.name === 'learn' || route.name === 'settings'} />}
       {route.name === 'home' && <Home />}
       {route.name === 'library' && <Library ch={route.ch} />}
       {route.name === 'learn' && <Learn id={route.id} />}
