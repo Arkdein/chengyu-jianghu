@@ -52,6 +52,23 @@ function Shelf({ s, onOpen }) {
   );
 }
 
+/** 印谱: every learnt skill's seal, like a page of seal impressions. Unlearnt ones are faint empty frames. */
+function SealBook({ s, onOpen }) {
+  const all = BOOKS.flatMap((b) => b.ids.map((id) => ({ b, id })));
+  const got = all.filter(({ id }) => has(s, id)).length;
+  return (
+    <div class="yinpu">
+      <div class="yinpu-head"><span class="brush">已习武学 · 印谱</span><small>{got} / {all.length}</small></div>
+      <div class="yinpu-grid">
+        {all.map(({ b, id }) => (has(s, id)
+          ? <button key={id} class="yp-seal" onClick={() => onOpen(b.id, id)} aria-label={`${SKILL[id].name}，《${b.title}》`}><Seal4 name={SKILL[id].name} kind="owned" /></button>
+          : <span key={id} class="yp-empty" aria-hidden="true" />))}
+      </div>
+      {got === 0 && <p class="small yinpu-tip">还没有习得武学。攒够内力，翻开秘籍修炼第一式，它的印就会盖在这里。</p>}
+    </div>
+  );
+}
+
 // ---------------------------------------------------------------- tree page
 const GO = (i) => 6 + (i * 88) / 12; // 13-line board, 6% margin
 
@@ -209,6 +226,7 @@ export function Skills() {
       <div class="wrap">
         <Top title="武学" sub={`藏经阁里的三部秘籍 · 现有内力 ${s.qi}`} />
         <Shelf s={s} onOpen={(id) => { setBookId(id); setPage(null); setTurn((t) => t + 1); setDir('open'); }} />
+        <SealBook s={s} onOpen={(bid, id) => { setBookId(bid); setPage(id); setTurn((t) => t + 1); setDir('open'); setStamped(null); }} />
         <p class="small mute shelf-tip">每门武学都出自古籍。翻开秘籍，点一式看它的由来，攒够内力就能修炼。走火入魔赚到的内力也算数。</p>
       </div>
     );

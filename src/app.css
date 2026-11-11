@@ -541,3 +541,18 @@ html, body { background-color: var(--paper); }
 .pips i.on { background: #B23A2B; border-color: #6E1E14; }
 .tome { width: 30%; }
 .shelf-tip { margin-top: 14px; color: var(--ink2); text-shadow: 0 0 6px rgba(var(--veil), 1), 0 0 2px rgba(var(--veil), 1); }
+
+/* 印谱 under the shelf */
+.yinpu { position: relative; margin: 16px 2px 0; padding: 12px 14px 14px; border-radius: 3px; color: #1E1B18;
+  background: radial-gradient(ellipse at 50% 0%, #FBF5E7, #F1E6CE 75%, #E8DABC); box-shadow: 0 6px 16px rgba(0, 0, 0, .25), inset 0 0 0 1px rgba(150, 110, 60, .25); }
+.yinpu::before { content: ''; position: absolute; inset: 7px; border: 1px solid rgba(178, 58, 43, .3); pointer-events: none; }
+.yinpu-head { display: flex; justify-content: space-between; align-items: baseline; padding: 0 2px 8px; border-bottom: 1px solid rgba(178, 58, 43, .25); }
+.yinpu-head .brush { font-size: 20px; color: #B23A2B; letter-spacing: .08em; }
+.yinpu-head small { font-size: 12px; color: #8A8073; font-variant-numeric: tabular-nums; }
+.yinpu-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-top: 10px; justify-items: center; }
+.yp-seal { padding: 0; border: 0; background: none; }
+.yp-seal .seal4 { width: 44px; height: 44px; font-size: 16px; transform: rotate(var(--r, -2deg)); }
+.yp-seal:nth-child(3n) .seal4 { --r: 2deg; }
+.yp-seal:nth-child(4n+1) .seal4 { --r: -4deg; }
+.yp-empty { width: 44px; height: 44px; border-radius: 5px; border: 1.5px dashed rgba(178, 58, 43, .25); background: rgba(255, 255, 255, .25); }
+.yinpu-tip { margin: 10px 2px 0; color: #4A443C; text-align: center; }
