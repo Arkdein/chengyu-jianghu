@@ -22,3 +22,5 @@ export const canBuy = (state, s) => !has(state, s.id) && (!s.req || has(state, s
 /** Cosmetic ranks by number of idioms practised to 熟练 (secure). Not used for the leaderboard. */
 export const RANKS = [[0, '初入江湖'], [10, '江湖新秀'], [30, '少侠'], [60, '大侠'], [100, '一代宗师']];
 export const rankOf = (secure) => RANKS.filter(([n]) => secure >= n).at(-1)[1];
+/** 0-based index of the 境界 reached. */
+export const rankIndex = (secure) => RANKS.filter(([n]) => secure >= n).length - 1;

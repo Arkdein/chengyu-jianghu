@@ -10,7 +10,7 @@ export { STRICTNESS };
 export function defaultState() {
   return {
     v: 1,
-    profile: { name: '', cls: '', menpai: 'H1', strict: 'std' },
+    profile: { name: '', cls: '', menpai: 'H1', strict: 'std', avatar: '', rankSeen: -1 },
     cards: {}, // idiom id -> SRS card (created when the idiom is learnt in 藏经阁)
     qi: 0, // banked 内力 (spent on the skill tree in Phase 2)
     runs: [], // last 60 runs: { day, mode, score, raw, strict, idioms, failed }
@@ -32,6 +32,8 @@ export function sanitize(s) {
       cls: String(p.cls || '').slice(0, 20),
       menpai: p.menpai === 'H2' ? 'H2' : 'H1',
       strict: STRICTNESS[p.strict] ? p.strict : 'std',
+      avatar: p.avatar === 'boy' || p.avatar === 'girl' ? p.avatar : '',
+      rankSeen: Number.isInteger(p.rankSeen) ? p.rankSeen : -1,
     },
     cards: {},
     qi: Number.isFinite(s.qi) ? Math.max(0, Math.round(s.qi)) : 0,

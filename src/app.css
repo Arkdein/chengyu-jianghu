@@ -374,3 +374,23 @@ html, body { background-color: var(--paper); }
 .hall-mtog { position: absolute; left: 12px; top: 26px; z-index: 4; }
 .small-tog { width: 30px; height: 30px; }
 .small-tog svg { width: 16px; height: 16px; }
+
+/* the student's avatar */
+.hall-av { position: absolute; left: 60%; bottom: 3%; height: 70%; max-height: 500px; transform: translateX(-50%); z-index: 1; pointer-events: none;
+  filter: drop-shadow(0 8px 16px rgba(30, 20, 10, .35)); animation: av-in .5s ease-out; }
+@keyframes av-in { from { opacity: 0; transform: translateX(-50%) translateY(10px); } to { opacity: 1; transform: translateX(-50%); } }
+.hall-say.with-pt { display: flex; gap: 8px; align-items: flex-start; }
+.hall-say.with-pt .pt { margin-top: 2px; }
+.av-pick { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.av-opt { display: grid; justify-items: center; gap: 4px; padding: 10px 6px 8px; border-radius: 12px; border: 1px solid var(--line);
+  background: linear-gradient(180deg, var(--paper2), var(--paper)); }
+.av-opt img { height: 180px; width: 100%; object-fit: contain; }
+.av-opt span { font-family: "Noto Serif SC", serif; font-weight: 700; }
+.av-opt.on { border: 2px solid var(--gold-mid); box-shadow: 0 0 0 3px var(--gold-soft); }
+.av-first .av-opt img { height: 220px; }
+.breakthrough .ocard { text-align: center; background: radial-gradient(circle at 50% 40%, #FFF8E6, var(--card) 70%); }
+.breakthrough h2 { font-size: 40px; margin: 2px 0 0; color: var(--gold); }
+.bt-av { height: 300px; max-width: 100%; object-fit: contain; display: block; margin: 4px auto; animation: bt-rise .9s ease-out; filter: drop-shadow(0 0 18px rgba(214, 174, 85, .55)); }
+@keyframes bt-rise { from { opacity: 0; transform: scale(.92) translateY(14px); filter: drop-shadow(0 0 0 rgba(214, 174, 85, 0)); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .hall-av, .bt-av { animation: none; } }
+@media (prefers-color-scheme: dark) { .breakthrough .ocard { background: radial-gradient(circle at 50% 40%, #3A3020, var(--card) 70%); } }

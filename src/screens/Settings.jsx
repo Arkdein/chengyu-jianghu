@@ -4,6 +4,8 @@ import { useStore, update, replaceState, resetState, storageWorks } from '../lib
 import { STRICTNESS, exportCode, importCode } from '../lib/progress.js';
 import { cacheAllAudio } from '../lib/audio.js';
 import { useMusic, setMusicOn, setMusicVol } from '../lib/music.js';
+import { AvatarPick } from '../components/Avatar.jsx';
+import { rankIndex, rankOf } from '../lib/skills.js';
 import { cacheAllStrokes } from '../lib/strokes.js';
 import { Top } from '../components/Bits.jsx';
 import { post } from '../lib/net.js';
@@ -27,6 +29,19 @@ export function Settings() {
         <h3>侠客名号</h3>
         <label class="field">姓名（上榜时显示）<input value={s.profile.name} maxLength={40} onInput={(e) => setProfile('name', e.currentTarget.value)} /></label>
         <label class="field">班级<input value={s.profile.cls} maxLength={20} onInput={(e) => setProfile('cls', e.currentTarget.value)} /></label>
+      </div>
+
+      <div class="card">
+        <h3>侠客形象</h3>
+        {(() => {
+          const secure = Object.values(s.cards).filter((c) => statusOf(c) === 'secure').length;
+          return (
+            <>
+              <p class="small mute" style={{ margin: '0 0 8px' }}>现在的境界：{rankOf(secure)}。境界提升，行头也会跟着变。</p>
+              <AvatarPick current={s.profile.avatar} secure={secure} tier={rankIndex(secure) + 1} />
+            </>
+          );
+        })()}
       </div>
 
       <div class="card">

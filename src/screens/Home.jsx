@@ -9,9 +9,10 @@ import { MODES } from '../lib/run.js';
 import { STRICTNESS } from '../lib/progress.js';
 import { nextScene, markSeen, storyChapter, bossFor } from '../lib/story.js';
 import { RANKS, rankOf } from '../lib/skills.js';
-import { sceneSrc, figSrc, FIGURE, ptSrc } from '../lib/art.js';
+import { sceneSrc, figSrc, FIGURE, PORTRAIT, ptSrc, avSrc } from '../lib/art.js';
 import { Dialogue } from '../components/Dialogue.jsx';
-import { MusicToggle } from '../components/Bits.jsx';
+import { MusicToggle, Portrait } from '../components/Bits.jsx';
+import { AvatarFirst, Breakthrough } from '../components/Avatar.jsx';
 
 /** Who greets the student when no scene is playing: a different 书院 resident each day. */
 const HOSTS = ['墨老', '青岚', '小砚'];
@@ -55,7 +56,10 @@ export function Home() {
   const other = main === 'full' ? 'short' : 'full';
   const open = (m) => learnt >= MODES[m].min;
 
-  const host = scene ? (FIGURE[speaker] ? speaker : null) : HOSTS[today % HOSTS.length];
+  const look = s.profile.avatar;
+  const daily = HOSTS[today % HOSTS.length];
+  // With an avatar the student stands centre stage; without one (first visit) the host does.
+  const host = look ? daily : scene ? (FIGURE[speaker] ? speaker : null) : daily;
   const final = c >= STORY.chapters.length;
   const revealed = final || s.story.pro.includes(c) || boss.kind === 'story';
   const bossName = final ? '蚀字魔·残影' : STORY.chapters[c].boss;
@@ -86,8 +90,15 @@ export function Home() {
           </div>
         </div>
 
-        {host && <img key={host} class="hall-fig" src={figSrc(FIGURE[host])} alt={host} />}
-        {host && !scene && <div class="hall-say serif"><b>{host}</b>{greeting(host, { name: s.profile.name, due, learnt, boss: boss.kind === 'story' ? bossName : '' })}</div>}
+        {look
+          ? <img key={`${look}-${ri}`} class="hall-av" src={avSrc(look, ri + 1)} alt={`${s.profile.name || '少侠'} · ${rankOf(secure)}`} />
+          : host && <img key={host} class="hall-fig" src={figSrc(FIGURE[host])} alt={host} />}
+        {host && !scene && (
+          <div class={`hall-say serif ${look ? 'with-pt' : ''}`}>
+            {look && <Portrait k={PORTRAIT[host]} size="xs" alt={host} />}
+            <div><b>{host}</b>{greeting(host, { name: s.profile.name, due, learnt, boss: boss.kind === 'story' ? bossName : '' })}</div>
+          </div>
+        )}
 
         <nav class="gems" aria-label="书院">
           <a class="gem" href={`#/library${next ? `/${next.n}` : ''}`}><span>藏经阁</span></a>
@@ -114,10 +125,12 @@ export function Home() {
         {scene && (
           <div class="hall-dlg">
             <Dialogue key={scene.key + scene.title + s.story.queue.length} scene={scene} name={s.profile.name}
-              bare onSpeaker={setSpeaker} onDone={() => { setSpeaker(null); update((st) => markSeen(st, scene)); }} />
+              bare={!look} onSpeaker={setSpeaker} onDone={() => { setSpeaker(null); update((st) => markSeen(st, scene)); }} />
           </div>
         )}
       </section>
+      {!scene && !look && <AvatarFirst secure={secure} />}
+      {!scene && look && ri > s.profile.rankSeen && <Breakthrough look={look} tier={ri} name={s.profile.name} />}
 
       <a class={`banner ${revealed ? '' : 'veiled'}`} href="#/story"
         style={{ backgroundImage: `url("${new URL(sceneSrc(`boss-${final ? 9 : c + 1}`), document.baseURI).href}")` }}>

@@ -5,6 +5,8 @@ export const sceneSrc = (k) => `${B}art/scenes/${k}.webp`;
 export const comicSrc = (id, n) => `${B}art/comics/${id}-${n}.webp`;
 export const ptSrc = (k) => `${B}art/pt/${k}.webp`;
 export const figSrc = (k) => `${B}art/fig/${k}.webp`;
+/** The student's own avatar: look 'boy' | 'girl', tier 1-5 follows the 境界 rank. */
+export const avSrc = (look, tier) => `${B}art/av/${look}-${tier}.webp`;
 
 /** One portrait per speaker, reused everywhere they appear. */
 export const PORTRAIT = { 墨老: 'molao', 青岚: 'qinglan', 小砚: 'xiaoyan', 柳先生: 'liu', 老金: 'laojin' };
