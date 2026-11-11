@@ -9,7 +9,7 @@ export default defineConfig({
     preact(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icons/*.png', 'icons/icon.svg', 'audio/manifest.json', 'stroke-manifest.json'],
+      includeAssets: ['icons/*.png', 'audio/manifest.json', 'stroke-manifest.json'],
       manifest: {
         name: '成语江湖 Chengyu Jianghu',
         short_name: '成语江湖',
