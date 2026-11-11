@@ -6,10 +6,10 @@ import { useEffect, useState } from 'preact/hooks';
 const BASE = import.meta.env.BASE_URL;
 const KEY = 'cyjh:music';
 const XF = 1.5; // crossfade inside the 2 s overlap
-const LEVEL = 0.45; // music sits well under speech
+const LEVEL = 0.8; // with the default volume the music sits about 5 dB under the word audio
 
 let pref = (() => {
-  try { return { on: false, vol: 0.6, ...JSON.parse(localStorage.getItem(KEY) || '{}') }; } catch { return { on: false, vol: 0.6 }; }
+  try { return { on: false, vol: 0.7, ...JSON.parse(localStorage.getItem(KEY) || '{}') }; } catch { return { on: false, vol: 0.7 }; }
 })();
 const subs = new Set();
 let ctx = null;
@@ -26,6 +26,11 @@ function save() {
   subs.forEach((f) => f(pref));
 }
 
+/** iPhone: Web Audio obeys the silent switch unless the page asks for playback. The student turned music on, so ask. */
+function session() {
+  try { if (navigator.audioSession) navigator.audioSession.type = pref.on ? 'playback' : 'auto'; } catch { /* not supported */ }
+}
+
 function ensure() {
   if (!ctx) {
     const C = window.AudioContext || window.webkitAudioContext;
@@ -35,8 +40,14 @@ function ensure() {
     duckNode = ctx.createGain();
     master.gain.value = pref.vol * LEVEL;
     master.connect(duckNode).connect(ctx.destination);
+    // iOS only lets Web Audio make sound once a buffer has been started inside a tap.
+    const s = ctx.createBufferSource();
+    s.buffer = ctx.createBuffer(1, 1, 22050);
+    s.connect(ctx.destination);
+    s.start(0);
   }
-  if (ctx.state === 'suspended' && !document.hidden) ctx.resume().catch(() => {});
+  session();
+  if (ctx.state !== 'running' && !document.hidden) ctx.resume().catch(() => {});
   return ctx;
 }
 
@@ -144,6 +155,7 @@ export function duck(on) {
 export function setMusicOn(on) {
   pref = { ...pref, on };
   save();
+  session();
   if (on) ensure();
   sync();
 }
