@@ -1,4 +1,4 @@
-import { useState } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
 import { fill } from '../lib/story.js';
 import { PORTRAIT } from '../lib/art.js';
 import { Portrait } from './Bits.jsx';
@@ -7,9 +7,10 @@ const ROLE = { 墨老: '山长', 青岚: '师姐', 小砚: '书童', 柳先生: 
 const MARK = { 墨老: '墨', 青岚: '岚', 小砚: '砚', 柳先生: '柳', 老金: '金', 旁白: '　' };
 
 /** A visual-novel style box: one line at a time, tap to go on. */
-export function Dialogue({ scene, name, onDone }) {
+export function Dialogue({ scene, name, onDone, onSpeaker, bare }) {
   const [i, setI] = useState(0);
   const line = scene.lines[i];
+  useEffect(() => { onSpeaker?.(line.s); }, [i, scene]);
   const last = i + 1 >= scene.lines.length;
   const lesson = line.s === '心得';
   const villain = !ROLE[line.s] && line.s !== '旁白' && !lesson;
@@ -21,7 +22,7 @@ export function Dialogue({ scene, name, onDone }) {
       ) : (
         <div class="dlg-row">
           {PORTRAIT[line.s]
-            ? <Portrait k={PORTRAIT[line.s]} alt={line.s} />
+            ? !bare && <Portrait k={PORTRAIT[line.s]} alt={line.s} />
             : line.s !== '旁白' && <div class={`dlg-mark ${villain ? 'evil' : ''}`}>{MARK[line.s] || line.s[0]}</div>}
           <div class="grow">
             {line.s !== '旁白' && <div class="dlg-who">{line.s}<span class="small mute">{ROLE[line.s] ? ` · ${ROLE[line.s]}` : ''}</span></div>}
