@@ -57,7 +57,7 @@ export function Run({ mode: modeArg }) {
   const [R, setR] = useState(() => ({
     layer: 0, picks: {}, hp: maxHp, qi: START_QI, qiEarned: 0, t0: Date.now(),
     charsWritten: 0, perfectChars: 0, perfectIdioms: 0, reveals: 0, bossPerfect: 0, idiomsSolved: 0,
-    recs: {}, used: [], freeHint: has(s, 'qian4'), mercy: has(s, 'qian6'), reroll: has(s, 'qing1'),
+    recs: {}, used: [], freeHint: has(s, 'qian4'), mercy: has(s, 'qian6'), reroll: has(s, 'qing1'), revive: has(s, 'qing3'), revived: 0,
     finish: null, end: null,
   }));
   const Rref = useRef(R);
@@ -68,6 +68,12 @@ export function Run({ mode: modeArg }) {
   const say = (t) => { setToast(t); clearTimeout(toastT.current); toastT.current = setTimeout(() => setToast(''), 1800); };
 
   const rec = (st, id) => st.recs[id] || emptyRec();
+  // 气血 gone: 御风而行 lets the student rise once for 50 内力; otherwise the run is lost.
+  const down = (next, st) => {
+    if (next.hp > 0 || st.finish) return next;
+    if (next.revive && next.qi >= 50) return { ...next, hp: 30, qi: next.qi - 50, revive: false, revived: next.revived + 1 };
+    return { ...next, finish: 'fail' };
+  };
   const act = {
     hurt(n, id, kind = 'mistakes') {
       if (kind === 'mistakes' && Rref.current.mercy) {
@@ -81,7 +87,7 @@ export function Run({ mode: modeArg }) {
         if (id) r[kind] += 1;
         const hp = Math.max(0, st.hp - n);
         const next = { ...st, hp, recs: id ? { ...st.recs, [id]: r } : st.recs };
-        return hp <= 0 && !st.finish ? { ...next, finish: 'fail' } : next;
+        return down(next, st);
       });
     },
     spend(n, id, kind) {
@@ -100,7 +106,10 @@ export function Run({ mode: modeArg }) {
       });
       return true;
     },
-    wrote(perfect) { setR((st) => ({ ...st, charsWritten: st.charsWritten + 1, perfectChars: st.perfectChars + (perfect ? 1 : 0) })); },
+    wrote(perfect) {
+      const bonus = perfect && has(getState(), 'wai5') ? 1 : 0; // 力透纸背
+      setR((st) => ({ ...st, charsWritten: st.charsWritten + 1, perfectChars: st.perfectChars + (perfect ? 1 : 0), qi: st.qi + bonus, qiEarned: st.qiEarned + bonus }));
+    },
     solved(id, { elite } = {}) {
       const r = rec(Rref.current, id);
       const perfect = r.mistakes + r.hints + r.traces + r.reveals === 0;
@@ -117,7 +126,7 @@ export function Run({ mode: modeArg }) {
         const r = { ...rec(st, id), quiz: right };
         const hp = Math.max(0, st.hp - (right ? 0 : hpLoss));
         const next = { ...st, hp, qi: st.qi + (right ? qiGain : 0), qiEarned: st.qiEarned + (right ? qiGain : 0), recs: { ...st.recs, [id]: r } };
-        return hp <= 0 && !st.finish ? { ...next, finish: 'fail' } : next;
+        return down(next, st);
       });
     },
     heal(n) { setR((st) => ({ ...st, hp: Math.min(maxHp, st.hp + n) })); },
@@ -131,6 +140,8 @@ export function Run({ mode: modeArg }) {
     pick(type) { setR((st) => ({ ...st, picks: { ...st.picks, [st.layer]: type } })); },
     toast: say,
   };
+
+  useEffect(() => { if (R.revived) say('御风而行：花 50 内力，以 30 气血再起！'); }, [R.revived]);
 
   // Save once the run is decided (never inside a state updater).
   const saved = useRef(false);
@@ -216,12 +227,12 @@ export function Run({ mode: modeArg }) {
           elite={type === 'elite'} act={act} leniency={leniency} canReroll={R.reroll}
           title={type === 'elite' ? '大擂台' : '比武'} />
       )}
-      {type === 'inn' && <Inn key={nodeKey} pool={learntItems} seed={seed + R.layer} act={act} trim={has(s, 'xin2')} />}
+      {type === 'inn' && <Inn key={nodeKey} pool={learntItems} seed={seed + R.layer} act={act} trim={has(s, 'xin2')} heal={has(s, 'qing2') ? 40 : GAIN.innHeal} />}
       {type === 'encounter' && <Encounter key={nodeKey} pool={learntItems} seed={seed + R.layer} act={act} trim={has(s, 'xin2')} />}
       {type === 'library' && <Library key={nodeKey} pool={learntItems} seed={seed + R.layer} act={act} trim={has(s, 'xin2')} />}
       {type === 'boss' && (
         <Boss key="boss" boss={boss} n={MODES[mode].boss} used={R.used} learnt={learntItems} act={act} leniency={leniency}
-          name={s.profile.name} giveFirst={has(s, 'qian2')} initials={has(s, 'xin1')} h2={menpai === 'H2'} art={bossNo} />
+          name={s.profile.name} giveFirst={has(s, 'qian2')} initials={has(s, 'xin1')} peek={has(s, 'xin3')} h2={menpai === 'H2'} art={bossNo} />
       )}
 
       {R.end && <EndCard R={R} strict={strict} mode={mode} boss={boss} name={s.profile.name} />}
@@ -464,7 +475,7 @@ function Choices({ target, opts, onAnswer, trim, rand }) {
 }
 const PickDone = () => null;
 
-function Inn({ pool, seed, act, trim }) {
+function Inn({ pool, seed, act, trim, heal }) {
   const rand = useMemo(() => rng(seed + 11), []);
   const qs = useMemo(() => pool.slice().sort(() => rand() - 0.5).slice(0, 3).map((t) => ({ t, opts: quiz(t, pool, 3, rand) })), []);
   const [healed, setHealed] = useState(false);
@@ -476,7 +487,7 @@ function Inn({ pool, seed, act, trim }) {
         <h2 class="brush" style={{ fontSize: '30px' }}>悦来客栈</h2>
         <Portrait k="laojin" size="l" alt="老金" />
         <p class="small">老金：“客官，喝碗热茶，养养精神。”</p>
-        <button class="btn primary big" onClick={() => { act.heal(GAIN.innHeal); setHealed(true); }}>歇脚（+{GAIN.innHeal} 气血）</button>
+        <button class="btn primary big" onClick={() => { act.heal(heal); setHealed(true); }}>歇脚（+{heal} 气血）</button>
       </div>
     );
   }
@@ -559,7 +570,8 @@ function Library({ pool, seed, act, trim }) {
 }
 
 // ---------------------------------------------------------------- 心魔: write whole idioms from the clue
-function Boss({ boss, n: count, used, learnt, act, leniency, name, giveFirst, initials, h2, art }) {
+function Boss({ boss, n: count, used, learnt, act, leniency, name, giveFirst, initials, peek, h2, art }) {
+  const [peeked, setPeeked] = useState(-1); // 胸有成竹: which idiom's example was opened (once per fight)
   const ids = useMemo(() => bossIdioms(getState(), learnt, count, new Set(used)).map((it) => it.id), []);
   // A taunt must never quote one of the idioms the student is about to write.
   const taunt = useMemo(() => {
@@ -631,6 +643,8 @@ function Boss({ boss, n: count, used, learnt, act, leniency, name, giveFirst, in
         <div class="txt">{it.clue}</div>
         {h2 && it.wenyan && <div class="hint">原文：{blankIn(it.wenyan, it.w)}</div>}
         {initials && <div class="small mute" style={{ marginTop: '6px' }}>知己知彼：{it.py.split(' ').map((p) => p[0]).join(' ')}</div>}
+        {peeked === n && <div class="hint">胸有成竹：{it.ctx}</div>}
+        {peek && peeked < 0 && <button class="btn" style={{ marginTop: '8px' }} onClick={() => setPeeked(n)}>胸有成竹 · 看例句</button>}
       </div>
       <div class="pattern">
         {[...it.w].map((c, i) => <span class={i === ci ? 'cur' : ''} key={i}>{i < ci ? c : i === ci ? '?' : ''}</span>)}

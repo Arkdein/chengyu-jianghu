@@ -90,3 +90,11 @@ test('every idiom has the fields the screens need', () => {
   }
   assert.equal(Object.keys(byId).length, idioms.length);
 });
+
+test('new 外功 skills raise idiom and boss points', () => {
+  const st = { charsWritten: 8, perfectChars: 8, idiomsSolved: 2, perfectIdioms: 0, hp: 50, secs: 9999, reveals: 1, bossPerfect: 1, strict: 'std' };
+  const base = score(st, {});
+  const up = score(st, { wai4: 1, wai6: 1 });
+  assert.equal(up.parts.idioms - base.parts.idioms, 40);
+  assert.equal(up.parts.boss - base.parts.boss, 75);
+});

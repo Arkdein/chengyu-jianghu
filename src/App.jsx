@@ -16,7 +16,7 @@ import { setMusic } from './lib/music.js';
 const SCREEN_MUSIC = { home: 'shuyuan', story: 'shuyuan', skills: 'shuyuan', records: 'shuyuan', settings: 'shuyuan', library: 'cangjing', learn: 'cangjing' };
 
 /** Backdrop per screen; a run sets its own per node. */
-const SCREEN_BG = { home: 'bg-hub', story: 'bg-hub', library: 'bg-library', learn: 'bg-library', skills: 'bg-hub', records: 'bg-hub', settings: 'bg-hub' };
+const SCREEN_BG = { home: 'bg-hub', story: 'bg-hub', library: 'bg-library', learn: 'bg-library', skills: 'bg-library', records: 'bg-hub', settings: 'bg-hub' };
 
 const TABS = [
   ['#/', 'home', '书院', 'Home'],

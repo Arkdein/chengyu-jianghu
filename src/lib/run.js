@@ -108,11 +108,11 @@ export function quiz(target, pool, n, rand) {
 export function score(stats, skills = {}) {
   const parts = {
     chars: stats.charsWritten * POINTS.char + (skills.wai1 ? (stats.perfectChars || 0) * 5 : 0),
-    idioms: stats.idiomsSolved * POINTS.idiom,
+    idioms: stats.idiomsSolved * (skills.wai6 ? 120 : POINTS.idiom),
     hp: Math.max(0, stats.hp) * POINTS.hp,
     speed: Math.max(0, (skills.wai3 ? 450 : POINTS.speedMax) - Math.floor(stats.secs / 2)),
     noReveal: stats.reveals === 0 ? POINTS.noReveal : 0,
-    boss: stats.bossPerfect * POINTS.bossPerfect,
+    boss: stats.bossPerfect * (skills.wai4 ? 225 : POINTS.bossPerfect),
     perfect: skills.wai2 ? (stats.perfectIdioms || 0) * 50 : 0,
   };
   const raw = Object.values(parts).reduce((a, b) => a + b, 0);
