@@ -3,6 +3,7 @@ import { useState } from 'preact/hooks';
 import { useStore, update, replaceState, resetState, storageWorks } from '../lib/store.js';
 import { STRICTNESS, exportCode, importCode } from '../lib/progress.js';
 import { cacheAllAudio } from '../lib/audio.js';
+import { useMusic, setMusicOn, setMusicVol } from '../lib/music.js';
 import { cacheAllStrokes } from '../lib/strokes.js';
 import { Top } from '../components/Bits.jsx';
 import { post } from '../lib/net.js';
@@ -18,6 +19,7 @@ export function Settings() {
   const [msg, setMsg] = useState('');
   const [confirmReset, setConfirmReset] = useState(false);
   const [dl, setDl] = useState('');
+  const music = useMusic();
   return (
     <div class="wrap">
       <Top title="设置" sub="门派、笔顺判定、备份" />
@@ -25,6 +27,17 @@ export function Settings() {
         <h3>侠客名号</h3>
         <label class="field">姓名（上榜时显示）<input value={s.profile.name} maxLength={40} onInput={(e) => setProfile('name', e.currentTarget.value)} /></label>
         <label class="field">班级<input value={s.profile.cls} maxLength={20} onInput={(e) => setProfile('cls', e.currentTarget.value)} /></label>
+      </div>
+
+      <div class="card">
+        <h3>背景音乐</h3>
+        <p class="small mute" style={{ margin: '0 0 8px' }}>书院、藏经阁、比武、客栈、奇遇、心魔各有一段原创配乐。默认关闭；朗读成语时音乐会自动变小。</p>
+        <div class="row" style={{ flexWrap: 'nowrap', gap: '12px' }}>
+          <button class={`btn ${music.on ? 'primary' : ''}`} onClick={() => setMusicOn(!music.on)}>{music.on ? '音乐：开' : '音乐：关'}</button>
+          <label class="grow small mute" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>音量
+            <input type="range" min="0.1" max="1" step="0.05" value={music.vol} class="grow" onInput={(e) => setMusicVol(Number(e.currentTarget.value))} />
+          </label>
+        </div>
       </div>
 
       <div class="card">

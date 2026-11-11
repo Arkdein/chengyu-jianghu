@@ -13,6 +13,10 @@ import { rng } from '../lib/grid.js';
 import { HanziPad } from '../components/HanziPad.jsx';
 import { IdiomCard, Sheet, Backdrop, Portrait, Comic } from '../components/Bits.jsx';
 import { NODE_BG, bossArt } from '../lib/art.js';
+import { setMusic, playSting } from '../lib/music.js';
+import { MusicToggle } from '../components/Bits.jsx';
+
+const NODE_MUSIC = { duel: 'biwu', elite: 'biwu', inn: 'kezhan', encounter: 'qiyu', library: 'cangjing', boss: 'xinmo' };
 
 const NODE = {
   duel: { name: '比武', desc: '成语填字擂台' },
@@ -137,6 +141,13 @@ export function Run({ mode: modeArg }) {
     setR((st) => ({ ...st, end }));
   }, [R.finish]);
 
+  const curType = plan ? (plan.layers[R.layer].length === 1 ? plan.layers[R.layer][0].type : R.picks[R.layer]) : null;
+  useEffect(() => {
+    if (!plan) return;
+    if (R.end) playSting(R.end.failed ? 'lose' : 'win');
+    else setMusic(curType ? NODE_MUSIC[curType] : 'qiyu');
+  }, [curType, R.layer, !!R.end]);
+
   if (!plan) {
     return (
       <div class="wrap full">
@@ -187,7 +198,10 @@ export function Run({ mode: modeArg }) {
       <Backdrop k={bg} strong={busy} />
       <div class="row" style={{ justifyContent: 'space-between' }}>
         <button class="back" onClick={() => setQuit(true)}>‹ 撤退</button>
-        <span class="small mute">{MODES[mode].name} · 第 {R.layer + 1} / {plan.layers.length} 站</span>
+        <span class="row" style={{ gap: '8px', flexWrap: 'nowrap' }}>
+          <span class="small mute">{MODES[mode].name} · 第 {R.layer + 1} / {plan.layers.length} 站</span>
+          <MusicToggle class="small-tog" />
+        </span>
       </div>
       <Route plan={plan} cur={R.layer} picks={R.picks} />
       <div class="stats3">

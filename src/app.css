@@ -366,3 +366,11 @@ html, body { background-color: var(--paper); }
 .nav a.on { color: var(--gold-hi); }
 .nav a.on b { color: var(--gold-hi); }
 .nav a.on::before { content: ''; position: absolute; top: -5px; left: 50%; width: 8px; height: 8px; margin-left: -4px; transform: rotate(45deg); background: var(--gold-hi); box-shadow: 0 0 0 2px var(--lacquer2); }
+
+/* music toggle */
+.mtog { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; padding: 0; flex: none;
+  background: rgba(26, 18, 13, .7); color: #A8977A; border: 1px solid var(--gold-mid); box-shadow: 0 3px 10px rgba(0, 0, 0, .25); }
+.mtog.on { color: var(--gold-hi); box-shadow: 0 0 0 2px rgba(241, 213, 138, .25), 0 3px 10px rgba(0, 0, 0, .25); }
+.hall-mtog { position: absolute; left: 12px; top: 26px; z-index: 4; }
+.small-tog { width: 30px; height: 30px; }
+.small-tog svg { width: 16px; height: 16px; }

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'preact/hooks';
+import { duck } from './music.js';
 
 const BASE = import.meta.env.BASE_URL;
 const clips = { w: new Set(), ex: new Set() };
@@ -55,8 +56,14 @@ export function play(item, part = 'w') {
   const text = part === 'w' ? item.w : item.ex;
   const key = part === 'w' ? item.id : `${item.id}-ex`;
   if (clips[part].has(item.id)) {
-    current = new Audio(`${BASE}audio/${key}.mp3`);
-    return current.play().catch(() => speak(text));
+    const a = new Audio(`${BASE}audio/${key}.mp3`);
+    current = a;
+    duck(true);
+    const undo = () => { if (current === a || !current) duck(false); };
+    a.addEventListener('ended', undo);
+    a.addEventListener('pause', undo);
+    a.addEventListener('error', undo);
+    return a.play().catch(() => { duck(false); return speak(text); });
   }
   return speak(text);
 }
@@ -68,6 +75,8 @@ function speak(text) {
   u.lang = 'zh-CN';
   u.voice = zhVoice;
   u.rate = 0.85;
+  duck(true);
+  u.onend = u.onerror = () => duck(false);
   s.speak(u);
   return Promise.resolve();
 }

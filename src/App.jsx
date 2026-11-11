@@ -10,6 +10,10 @@ import { Settings } from './screens/Settings.jsx';
 import { Skills } from './screens/Skills.jsx';
 import { Story } from './screens/Story.jsx';
 import { Backdrop } from './components/Bits.jsx';
+import { setMusic } from './lib/music.js';
+
+/** Loop per screen; a run picks its own per node. */
+const SCREEN_MUSIC = { home: 'shuyuan', story: 'shuyuan', skills: 'shuyuan', records: 'shuyuan', settings: 'shuyuan', library: 'cangjing', learn: 'cangjing' };
 
 /** Backdrop per screen; a run sets its own per node. */
 const SCREEN_BG = { home: 'bg-hub', story: 'bg-hub', library: 'bg-library', learn: 'bg-library', skills: 'bg-hub', records: 'bg-hub', settings: 'bg-hub' };
@@ -25,6 +29,7 @@ const TABS = [
 export function App() {
   const route = useRoute();
   useEffect(() => { loadAudioManifest(); }, []);
+  useEffect(() => { if (route.name !== 'run') setMusic(SCREEN_MUSIC[route.name] || 'shuyuan'); }, [route.name]);
   const inRun = route.name === 'run';
   return (
     <>

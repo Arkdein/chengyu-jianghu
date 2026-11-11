@@ -11,6 +11,7 @@ import { nextScene, markSeen, storyChapter, bossFor } from '../lib/story.js';
 import { RANKS, rankOf } from '../lib/skills.js';
 import { sceneSrc, figSrc, FIGURE, ptSrc } from '../lib/art.js';
 import { Dialogue } from '../components/Dialogue.jsx';
+import { MusicToggle } from '../components/Bits.jsx';
 
 /** Who greets the student when no scene is playing: a different 书院 resident each day. */
 const HOSTS = ['墨老', '青岚', '小砚'];
@@ -64,6 +65,7 @@ export function Home() {
       <section class="hall">
         <div class="hall-bg" style={{ backgroundImage: `url("${new URL(sceneSrc('bg-hub'), document.baseURI).href}")` }} aria-hidden="true" />
 
+        <MusicToggle class="hall-mtog" />
         <header class="plaque">
           <span class="roller" aria-hidden="true" />
           <div class="plaque-in">

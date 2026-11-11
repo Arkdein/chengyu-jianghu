@@ -1,5 +1,18 @@
 import { play, useAudioReady } from '../lib/audio.js';
 import { sceneSrc, comicSrc, ptSrc } from '../lib/art.js';
+import { useMusic, setMusicOn } from '../lib/music.js';
+
+/** ♪ on/off. Off by default so a classroom doesn't burst into sound. */
+export function MusicToggle({ class: cls = '' }) {
+  const m = useMusic();
+  return (
+    <button class={`mtog ${m.on ? 'on' : ''} ${cls}`} aria-pressed={m.on} aria-label={m.on ? '关掉背景音乐' : '打开背景音乐'}
+      onClick={(e) => { e.stopPropagation(); setMusicOn(!m.on); }}>
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M9 18V6l10-2v12" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" /><circle cx="6.5" cy="18" r="2.6" fill="currentColor" /><circle cx="16.5" cy="16" r="2.6" fill="currentColor" />{!m.on && <path d="M3 3l18 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />}</svg>
+    </button>
+  );
+}
+
 
 /** Full-screen ink-wash backdrop behind a screen. strong = heavier paper veil (busy screens like the grid).
  * The URL is made absolute: a relative url() inside a CSS variable resolves against the stylesheet, not the page. */

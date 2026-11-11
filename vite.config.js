@@ -28,9 +28,14 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,json}'],
-        globIgnores: ['audio/*.mp3', 'strokes/*.json', 'strokes/*.TXT'],
+        globIgnores: ['audio/*.mp3', 'music/*.mp3', 'strokes/*.json', 'strokes/*.TXT'],
         navigateFallback: 'index.html',
         runtimeCaching: [
+          {
+            urlPattern: ({ url }) => url.pathname.includes('/music/') && url.pathname.endsWith('.mp3'),
+            handler: 'CacheFirst',
+            options: { cacheName: 'music', expiration: { maxEntries: 20 }, cacheableResponse: { statuses: [200] } },
+          },
           {
             urlPattern: ({ url }) => url.pathname.includes('/art/') && url.pathname.endsWith('.webp'),
             handler: 'CacheFirst',
