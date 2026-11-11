@@ -23,23 +23,31 @@ function stateOf(s, sk) {
 
 // ---------------------------------------------------------------- shelf
 function Shelf({ s, onOpen }) {
+  const info = BOOKS.map((b) => ({
+    b,
+    got: b.ids.filter((id) => has(s, id)).length,
+    ready: b.ids.filter((id) => stateOf(s, SKILL[id]) === 'ready').length,
+  }));
   return (
     <div class="shelf">
-      {BOOKS.map((b) => {
-        const got = b.ids.filter((id) => has(s, id)).length;
-        const ready = b.ids.some((id) => stateOf(s, SKILL[id]) === 'ready');
-        return (
-          <button class="tome" key={b.id} style={{ backgroundImage: `url(${bookArt(`cover-${b.id}`)})` }} onClick={() => onOpen(b.id)} aria-label={`打开《${b.title}》`}>
+      <div class="shelf-row">
+        {info.map(({ b, got }) => (
+          <button class="tome" key={b.id} style={{ backgroundImage: `url(${bookArt(`cover-${b.id}`)})` }} onClick={() => onOpen(b.id)}
+            aria-label={`打开《${b.title}》，${b.sub}，已习 ${got} / ${b.ids.length}`}>
             <span class="tome-slip brush">{b.title}</span>
-            {ready && <i class="tome-dot" aria-label="有武学可以修炼" />}
-            <span class="tome-foot">
-              <b>{b.sub}</b>
-              <small>已习 {got} / {b.ids.length}</small>
-            </span>
           </button>
-        );
-      })}
-      <div class="shelf-board" aria-hidden="true" />
+        ))}
+      </div>
+      {/* the shelf's front edge carries a brass plaque under each book */}
+      <div class="shelf-board">
+        {info.map(({ b, got, ready }) => (
+          <button class="plaque-b" key={b.id} onClick={() => onOpen(b.id)} tabIndex={-1} aria-hidden="true">
+            <b>{b.sub}</b>
+            <span class="pips">{b.ids.map((id) => <i key={id} class={has(s, id) ? 'on' : ''} />)}</span>
+            <small>已习 {got} / {b.ids.length}{ready > 0 && <em> · 可修炼 {ready}</em>}</small>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
